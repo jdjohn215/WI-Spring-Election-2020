@@ -43,5 +43,5 @@ ggplot(d, aes(positive, performance)) +
   labs(title = "Fewer absentee ballots have been returned in counties with more cases of COVID-19",
        subtitle = "Comparison of absentee ballots returned the day before the spring election in 2019 and 2020",
        caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code") 
-
+ggsave("plots/AbsenteeBallotsByCOVIDCases.png", width = 8)
 lm(performance ~ positive, data = d) %>% summary()
