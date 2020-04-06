@@ -1,0 +1,53 @@
+---
+title: "Fewer absentee ballots have been returned in counties with more (diagnosed) cases of COVID-19"
+author: "John Johnson"
+date: "4/6/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+
+covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 15:41:25.rds")
+
+d <- covid.compare %>%
+  select(county_name, share19, share20, performance, positive)
+
+hardest.hit.counties <- d %>%
+  top_n(5, positive) %>%
+  pull(county_name)
+hardest.hit.counties
+
+# share of cases in the hardest-hit counties
+(sum(d$positive[d$county_name %in% hardest.hit.counties])/sum(d$positive))*100
+
+# share of absentee ballots returned in hardest-hit counties in 2019
+hardest.hit.share.19 <- (sum(d$share19[d$county_name %in% hardest.hit.counties]))*100
+
+# share of absentee ballots returned in hardest-hit counties in 2020
+hardest.hit.share.20 <- (sum(d$share20[d$county_name %in% hardest.hit.counties]))*100
+
+# change in share for these counties
+change.in.share <- hardest.hit.share.20 - hardest.hit.share.19
+```
+
+As of 3:00pm on Monday, April 6th Wisconsin has reported 2,440 positive diagnoses of COVID-19. Of these, 1,860 (or 76%) are in the 5 hardest-hit counties: Milwaukee, Dane, Waukesha, Kenosha, and Ozaukee. Each county except Kenosha has seen it's share of the absentee-ballot electorate fall from the 2019 Spring election to the 2020 Spring election.
+
+**Collectively, the share of absentee ballots returned in these 5 counties has declined `r round(abs(change.in.share), 1)`%, from `r round(hardest.hit.share.19, 1)`% of statewide ballots in 2019 to `r round(hardest.hit.share.20, 1)`% in 2020.**
+
+See the code in this repo for how these stats were calculated. 
+
+```{r, echo=FALSE, fig.width=8}
+ggplot(d, aes(positive, performance)) +
+  geom_point() +
+  ggrepel::geom_text_repel(data = function(x){filter(x, positive > 25)},
+                           aes(label = str_to_title(county_name))) +
+  scale_y_continuous(labels = scales::percent,
+                     name = "Change in share of total from 2019 to 2020") +
+  scale_x_continuous(name = "Positive diagnoses of COVID-19",
+                     labels = scales::number_format(big.mark = ",")) +
+  labs(title = "Fewer absentee ballots have been returned in counties with more cases of COVID-19",
+       subtitle = "Comparison of absentee ballots returned the day before the spring election in 2019 and 2020",
+       caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code") 
+```
