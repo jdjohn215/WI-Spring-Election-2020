@@ -1,5 +1,5 @@
 ---
-title: "Fewer absentee ballots have been returned in counties with more (diagnosed) cases of COVID-19"
+title: "Do absentee ballot returns look more or less like the general electorate?"
 author: "John Johnson"
 date: "4/6/2020"
 output: github_document
@@ -9,10 +9,12 @@ output: github_document
 library(tidyverse)
 library(knitr)
 
-covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 15:41:25.rds")
+covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 16:56:55.rds")
 
 d <- covid.compare %>%
-  select(county_name, share19, share20, performance, positive)
+  select(county_name, share19, share20, performance, positive, votes19) %>%
+  mutate(voteshare = votes19/sum(votes19),
+         compare_to_total = share20 - voteshare)
 
 hardest.hit.counties <- d %>%
   top_n(5, positive) %>%
@@ -30,15 +32,23 @@ hardest.hit.share.20 <- (sum(d$share20[d$county_name %in% hardest.hit.counties])
 
 # change in share for these counties
 change.in.share <- hardest.hit.share.20 - hardest.hit.share.19
+
+# share of absentee ballots returned in hardest-hit counties in 2019
+hardest.hit.vote.share.19 <- (sum(d$votes19[d$county_name %in% hardest.hit.counties])/sum(d$votes19))*100
+
 ```
 
-As of 3:00pm on Monday, April 6th Wisconsin has reported 2,440 positive diagnoses of COVID-19. Of these, 1,860 (or 76%) are in the 5 hardest-hit counties: Milwaukee, Dane, Waukesha, Kenosha, and Ozaukee. Each county except Kenosha has seen it's share of the absentee-ballot electorate fall from the 2019 Spring election to the 2020 Spring election.
+As of 3:00pm on Monday, April 6th Wisconsin has reported 2,440 positive diagnoses of COVID-19. Of these, 1,860 (or 76%) are in the 5 hardest-hit counties: Milwaukee, Dane, Waukesha, Kenosha, and Ozaukee. Each county except Kenosha has seen its share of the absentee-ballot electorate fall from the 2019 Spring election to the 2020 Spring election.
 
 **Collectively, the share of absentee ballots returned in these 5 counties has declined `r round(abs(change.in.share), 1)`%, from `r round(hardest.hit.share.19, 1)`% of statewide ballots in 2019 to `r round(hardest.hit.share.20, 1)`% in 2020.**
 
-See the code in this repo for how these stats were calculated. 
+The question is, to what extent will these absentee ballot numbers mirror the final electorate? 
 
-```{r, echo=FALSE, fig.width=8}
+In 2019 only a small amount of voters used the absentee process, and they were not evenly distributed across the counties. The five counties mentioned above only made up 38.8% of the total Spring 2019 electorate when it was all said and done. If the absentee ballots cast thus far in 2020 actually make up a preponderance of the electorate (as they likely will), then the situation looks much different, with **the 5 counties described above potentially making up 5.5% *more* of the electorate than in 2019**.
+
+(See the code in this repo for how these stats were calculated.)
+
+```{r, echo=FALSE, fig.width=8, include=FALSE}
 ggplot(d, aes(positive, performance)) +
   geom_point() +
   ggrepel::geom_text_repel(data = function(x){filter(x, positive > 25)},
@@ -49,5 +59,20 @@ ggplot(d, aes(positive, performance)) +
                      labels = scales::number_format(big.mark = ",")) +
   labs(title = "Fewer absentee ballots have been returned in counties with more cases of COVID-19",
        subtitle = "Comparison of absentee ballots returned the day before the spring election in 2019 and 2020",
-       caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code") 
+       caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code")
+```
+
+
+```{r, echo=FALSE, fig.width=8, include=FALSE}
+ggplot(d, aes(positive, compare_to_total)) +
+  geom_point() +
+  ggrepel::geom_text_repel(data = function(x){filter(x, positive > 25)},
+                           aes(label = str_to_title(county_name))) +
+  scale_y_continuous(labels = scales::percent,
+                     name = "Change in share of total from 2019 to 2020") +
+  scale_x_continuous(name = "Positive diagnoses of COVID-19",
+                     labels = scales::number_format(big.mark = ",")) +
+  labs(title = "If the 2020 absentee electorate looks like the final electorate, a very different story",
+       subtitle = "Comparison of absentee ballots returned the day before the spring election in 2020 with the total 2019 electorate",
+       caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code")
 ```

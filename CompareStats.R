@@ -4,7 +4,7 @@ library(tidyverse)
 library(sf)
 library(tmap)
 
-covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 15:41:25.rds")
+covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 16:56:55.rds")
 
 d <- covid.compare %>%
   select(county_name, share19, share20, performance, positive)
@@ -26,24 +26,25 @@ hardest.hit.share.20 <- (sum(d$share20[d$county_name %in% hardest.hit.counties])
 # change in share for these counties
 change.in.share <- hardest.hit.share.20 - hardest.hit.share.19
 
-wi.county.sf <- tigris::counties(state = "55", cb = TRUE, class = "sf") %>%
-  select(county_name = NAME) %>%
-  mutate(county_name = str_to_upper(county_name))
+# wi.county.sf <- tigris::counties(state = "55", cb = TRUE, class = "sf") %>%
+#   select(county_name = NAME) %>%
+#   mutate(county_name = str_to_upper(county_name))
+# 
+# d2 <- inner_join(wi.county.sf, d) %>%
+#   mutate(positive = replace(positive, positive == 0, NA),
+#          performance = performance*100)
+# 
+# tm_shape(d2) +
+#   tm_polygons() +
+#   tm_shape(d2) +
+#   tm_fill(col = "positive", breaks = c(-Inf,10,100,500,1000,Inf),
+#           textNA = "none", colorNA = "white", title = "COVID-19 diagnoses") +
+#   tm_layout(frame = FALSE)
+# 
+# tm_shape(d2) +
+#   tm_polygons() +
+#   tm_shape(d2) +
+#   tm_fill(col = "performance",
+#           breaks = c(-Inf, -1, -0.5, 0, 0.5, 1, Inf))
 
-d2 <- inner_join(wi.county.sf, d) %>%
-  mutate(positive = replace(positive, positive == 0, NA),
-         performance = performance*100)
-
-tm_shape(d2) +
-  tm_polygons() +
-  tm_shape(d2) +
-  tm_fill(col = "positive", breaks = c(-Inf,10,100,500,1000,Inf),
-          textNA = "none", colorNA = "white", title = "COVID-19 diagnoses") +
-  tm_layout(frame = FALSE)
-
-tm_shape(d2) +
-  tm_polygons() +
-  tm_shape(d2) +
-  tm_fill(col = "performance",
-          breaks = c(-Inf, -1, -0.5, 0, 0.5, 1, Inf))
 

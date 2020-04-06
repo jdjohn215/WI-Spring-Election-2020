@@ -25,7 +25,16 @@ covid <- read_csv("https://opendata.arcgis.com/datasets/360c2995846e4af99461cb80
   janitor::clean_names() %>%
   mutate(name = str_to_upper(name))
 
-compare <- inner_join(ballots, covid, by = c("county_name" = "name"))
+electorate19 <- tempfile()
+download.file("https://elections.wi.gov/sites/elections.wi.gov/files/Spring%20Election%204.2.19-CxC%20Report-Supreme%20Court.xlsx",
+              electorate19)
+electorate19 <- readxl::read_excel(electorate19, sheet = 2, skip = 7, 
+                                   col_names = c("county_name", "drop", "votes19", "hagedorn", "neubauer", "scatter")) %>%
+  select(county_name, votes19)
+electorate19
+
+compare <- inner_join(ballots, covid, by = c("county_name" = "name")) %>%
+  inner_join(electorate19)
 
 d <- compare %>%
   mutate(share19 = ballots_returned_19/sum(ballots_returned_19),
