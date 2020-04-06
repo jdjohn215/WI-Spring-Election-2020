@@ -46,4 +46,4 @@ ggplot(d, aes(positive, performance)) +
 ggsave("plots/AbsenteeBallotsByCOVIDCases.png", width = 8)
 lm(performance ~ positive, data = d) %>% summary()
 
-saveRDS(compare, paste("data/CompareVotesAndCOVIDCases_", Sys.time()))
+saveRDS(compare, paste0("data/CompareVotesAndCOVIDCases_", Sys.time(), ".rds"))
