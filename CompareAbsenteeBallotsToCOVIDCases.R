@@ -45,3 +45,5 @@ ggplot(d, aes(positive, performance)) +
        caption = "Data is from WI Election Commission & WI DHS. See github.com/jdjohn215/WI-Spring-Election-2020 for source code") 
 ggsave("plots/AbsenteeBallotsByCOVIDCases.png", width = 8)
 lm(performance ~ positive, data = d) %>% summary()
+
+saveRDS(compare, paste("data/CompareVotesAndCOVIDCases_", Sys.time()))
