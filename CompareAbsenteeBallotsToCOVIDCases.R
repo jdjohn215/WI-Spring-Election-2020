@@ -34,8 +34,8 @@ d <- compare %>%
 
 ggplot(d, aes(positive, performance)) +
   geom_point() +
-  geom_text(aes(label = str_to_title(county_name)),
-            check_overlap = TRUE) +
+  ggrepel::geom_text_repel(data = function(x){filter(x, positive > 25)},
+                           aes(label = str_to_title(county_name))) +
   scale_y_continuous(labels = scales::percent,
                      name = "Change in share of total from 2019 to 2020") +
   scale_x_continuous(name = "Positive diagnoses of COVID-19",

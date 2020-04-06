@@ -4,7 +4,7 @@ library(tidyverse)
 library(sf)
 library(tmap)
 
-covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 15:00:49.rds")
+covid.compare <- readRDS("data/CompareVotesAndCOVIDCases_2020-04-06 15:41:25.rds")
 
 d <- covid.compare %>%
   select(county_name, share19, share20, performance, positive)
